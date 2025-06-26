@@ -16,7 +16,13 @@ const userController = () => {
    * @param req The incoming request containing user data.
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
-  const isUserBodyValid = (req: UserRequest): boolean => false;
+  const isUserBodyValid = (req: UserRequest): boolean => {
+    const { username, password } = req.body || {};
+    // We need type checks because req.body comes from external, 
+    // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
+    return typeof username === 'string' && username.trim() !== '' &&
+           typeof password === 'string' && password.trim() !== '';
+  };
   // TODO: Task 1 - Implement the isUserBodyValid function
 
   /**
@@ -26,8 +32,21 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const createUser = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the createUser function
-    res.status(501).send('Not implemented');
+    if (!isUserBodyValid(req)) {
+      res.status(400).json({ error: 'Invalid user data' });
+      return;
+    }
+    const user: User = {
+      username: req.body.username,
+      password: req.body.password,
+      dateJoined: new Date(),
+    };
+    const result = await saveUser(user);
+    if ('error' in result) {
+      res.status(400).json(result);
+    } else {
+      res.status(201).json(result);
+    }
   };
 
   /**
@@ -37,8 +56,20 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const userLogin = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the userLogin function
-    res.status(501).send('Not implemented');
+    if (!isUserBodyValid(req)) {
+      res.status(400).json({ error: 'Invalid login data' });
+      return;
+    }
+    const credentials = {
+      username: req.body.username,
+      password: req.body.password,
+    };
+    const result = await loginUser(credentials);
+    if ('error' in result) {
+      res.status(401).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   /**
@@ -48,8 +79,17 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const getUser = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the getUser function
-    res.status(501).send('Not implemented');
+    const { username } = req.params;
+    if (!username) {
+      res.status(400).json({ error: 'Username is required' });
+      return;
+    }
+    const result = await getUserByUsername(username);
+    if ('error' in result) {
+      res.status(404).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   /**
@@ -59,8 +99,17 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const deleteUser = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the deleteUser function
-    res.status(501).send('Not implemented');
+    const { username } = req.params;
+    if (!username) {
+      res.status(400).json({ error: 'Username is required' });
+      return;
+    }
+    const result = await deleteUserByUsername(username);
+    if ('error' in result) {
+      res.status(404).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   /**
@@ -70,12 +119,25 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const resetPassword = async (req: UserRequest, res: Response): Promise<void> => {
-    // TODO: Task 1 - Implement the resetPassword function
-    res.status(501).send('Not implemented');
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+      res.status(400).json({ error: 'Username and new password are required' });
+      return;
+    }
+    const result = await updateUser(username, { password });
+    if ('error' in result) {
+      res.status(404).json(result);
+    } else {
+      res.status(200).json(result);
+    }
   };
 
   // Define routes for the user-related operations.
-  // TODO: Task 1 - Add appropriate HTTP verbs and endpoints to the router
+  router.post('/signup', createUser);
+  router.post('/login', userLogin);
+  router.get('/:username', getUser);
+  router.delete('/:username', deleteUser);
+  router.patch('/reset-password', resetPassword);
 
   return router;
 };
