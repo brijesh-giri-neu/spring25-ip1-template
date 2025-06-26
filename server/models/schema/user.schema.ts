@@ -15,7 +15,7 @@ const userSchema: Schema = new Schema(
     password: { type: String, required: true },
     dateJoined: { type: Date, default: Date.now },
   },
-  { collection: 'User' }
+  { collection: 'User' },
 );
 
 export default userSchema;

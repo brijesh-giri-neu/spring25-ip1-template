@@ -1,5 +1,6 @@
 import UserModel from '../models/users.model';
 import { User, UserCredentials, UserResponse } from '../types/types';
+import userToSafeUser from '../utils/converter.util';
 
 /**
  * Saves a new user to the database.
@@ -10,8 +11,7 @@ import { User, UserCredentials, UserResponse } from '../types/types';
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
     const result = await UserModel.create(user);
-    const { password, ...safeUser } = result.toObject();
-    return safeUser;
+    return userToSafeUser(result);
   } catch (error) {
     return { error: 'Error when saving a user' };
   }
@@ -29,8 +29,7 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
     if (!user) {
       return { error: 'User not found' };
     }
-    const { password, ...safeUser } = user.toObject();
-    return safeUser;
+    return userToSafeUser(user);
   } catch (error) {
     return { error: 'Error when retrieving user' };
   }
@@ -48,8 +47,7 @@ export const loginUser = async (loginCredentials: UserCredentials): Promise<User
     if (!user || user.password !== loginCredentials.password) {
       return { error: 'Invalid username or password' };
     }
-    const { password, ...safeUser } = user.toObject();
-    return safeUser;
+    return userToSafeUser(user);
   } catch (error) {
     return { error: 'Error during login' };
   }
@@ -67,8 +65,7 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
     if (!user) {
       return { error: 'User not found' };
     }
-    const { password, ...safeUser } = user.toObject();
-    return safeUser;
+    return userToSafeUser(user);
   } catch (error) {
     return { error: 'Error when deleting user' };
   }
@@ -81,18 +78,16 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
  * @param {Partial<User>} updates - An object containing the fields to update and their new values.
  * @returns {Promise<UserResponse>} - Resolves with the updated user object (without the password) or an error message.
  */
-export const updateUser = async (username: string, updates: Partial<User>): Promise<UserResponse> => {
+export const updateUser = async (
+  username: string,
+  updates: Partial<User>,
+): Promise<UserResponse> => {
   try {
-    const user = await UserModel.findOneAndUpdate(
-      { username },
-      updates,
-      { new: true }
-    );
+    const user = await UserModel.findOneAndUpdate({ username }, updates, { new: true });
     if (!user) {
       return { error: 'User not found' };
     }
-    const { password, ...safeUser } = user.toObject();
-    return safeUser;
+    return userToSafeUser(user);
   } catch (error) {
     return { error: 'Error when updating user' };
   }

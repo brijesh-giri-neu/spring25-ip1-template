@@ -18,10 +18,14 @@ const userController = () => {
    */
   const isUserBodyValid = (req: UserRequest): boolean => {
     const { username, password } = req.body || {};
-    // We need type checks because req.body comes from external, 
+    // We need type checks because req.body comes from external,
     // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
-    return typeof username === 'string' && username.trim() !== '' &&
-           typeof password === 'string' && password.trim() !== '';
+    return (
+      typeof username === 'string' &&
+      username.trim() !== '' &&
+      typeof password === 'string' &&
+      password.trim() !== ''
+    );
   };
   // TODO: Task 1 - Implement the isUserBodyValid function
 
@@ -60,7 +64,7 @@ const userController = () => {
       res.status(400).json({ error: 'Invalid login data' });
       return;
     }
-    const credentials = {
+    const credentials: UserCredentials = {
       username: req.body.username,
       password: req.body.password,
     };
