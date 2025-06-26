@@ -1,6 +1,5 @@
 import UserModel from '../models/users.model';
-import { User, UserCredentials, UserResponse } from '../types/types';
-import userToSafeUser from '../utils/converter.util';
+import { User, UserCredentials, UserResponse, SafeUser } from '../types/types';
 
 /**
  * Saves a new user to the database.
@@ -11,7 +10,7 @@ import userToSafeUser from '../utils/converter.util';
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
     const result = await UserModel.create(user);
-    return userToSafeUser(result);
+    return result as SafeUser;
   } catch (error) {
     return { error: 'Error when saving a user' };
   }
@@ -29,7 +28,7 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
     if (!user) {
       return { error: 'User not found' };
     }
-    return userToSafeUser(user);
+    return user as SafeUser;
   } catch (error) {
     return { error: 'Error when retrieving user' };
   }
@@ -43,11 +42,14 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
  */
 export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> => {
   try {
-    const user = await UserModel.findOne({ username: loginCredentials.username });
-    if (!user || user.password !== loginCredentials.password) {
+    const user = await UserModel.findOne({ 
+      username: loginCredentials.username,
+      password: loginCredentials.password 
+    });
+    if (!user) {
       return { error: 'Invalid username or password' };
     }
-    return userToSafeUser(user);
+    return user as SafeUser;
   } catch (error) {
     return { error: 'Error during login' };
   }
@@ -65,7 +67,7 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
     if (!user) {
       return { error: 'User not found' };
     }
-    return userToSafeUser(user);
+    return user as SafeUser;
   } catch (error) {
     return { error: 'Error when deleting user' };
   }
@@ -87,7 +89,7 @@ export const updateUser = async (
     if (!user) {
       return { error: 'User not found' };
     }
-    return userToSafeUser(user);
+    return user as SafeUser;
   } catch (error) {
     return { error: 'Error when updating user' };
   }
