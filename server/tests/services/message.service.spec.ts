@@ -33,17 +33,37 @@ describe('Message model', () => {
 
       expect(savedMessage).toMatchObject(message1);
     });
+
     // TODO: Task 2 - Write a test case for saveMessage when an error occurs
+    it('should return error when save fails', async () => {
+      // Use Jest spy to simulate error
+      const createSpy = jest.spyOn(MessageModel, 'create').mockRejectedValueOnce(new Error('Database error'));
+
+      const result = await saveMessage(message1);
+
+      expect(result).toEqual({ error: 'Error when saving a message' });
+      createSpy.mockRestore();
+    });
   });
 
   describe('getMessages', () => {
     it('should return all messages, sorted by date', async () => {
-      mockingoose(MessageModel).toReturn([message2, message1], 'find');
+      mockingoose(MessageModel).toReturn([message1, message2], 'find');
 
       const messages = await getMessages();
 
       expect(messages).toMatchObject([message1, message2]);
     });
+
     // TODO: Task 2 - Write a test case for getMessages when an error occurs
+    it('should return empty array when getMessages fails', async () => {
+      // Use Jest spy to simulate error
+      const findSpy = jest.spyOn(MessageModel, 'find').mockRejectedValueOnce(new Error('Database error'));
+
+      const messages = await getMessages();
+
+      expect(messages).toEqual([]);
+      findSpy.mockRestore();
+    });
   });
 });

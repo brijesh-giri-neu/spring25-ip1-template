@@ -14,6 +14,8 @@ const messageController = (socket: FakeSOSocket) => {
    * @returns `true` if the request is valid, otherwise `false`.
    */
   const isRequestValid = (req: AddMessageRequest): boolean => {
+    // We need type checks because req.body comes from external,
+    // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
     const { messageToAdd } = req.body || {};
     return messageToAdd && typeof messageToAdd === 'object';
   };
@@ -26,11 +28,14 @@ const messageController = (socket: FakeSOSocket) => {
    * @returns `true` if the message is valid, otherwise `false`.
    */
   const isMessageValid = (message: Message): boolean => {
+    // We need type checks because req.body comes from external,
+    // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
     return (
       typeof message.msg === 'string' &&
       message.msg.trim() !== '' &&
       typeof message.msgFrom === 'string' &&
-      message.msgFrom.trim() !== ''
+      message.msgFrom.trim() !== '' &&
+      message.msgDateTime instanceof Date && !isNaN(message.msgDateTime.getTime())  // Verify that msgDateTime is a valid Date object
     );
   };
 
@@ -45,19 +50,30 @@ const messageController = (socket: FakeSOSocket) => {
    */
   const addMessageRoute = async (req: AddMessageRequest, res: Response): Promise<void> => {
     if (!isRequestValid(req)) {
-      res.status(400).json({ error: 'Invalid request' });
+      res.status(400).send('Invalid request');
       return;
     }
 
-    const { messageToAdd } = req.body;
+    // Deserialized as a raw string by express server
+    const rawMessage = req.body.messageToAdd;
+
+    // Need to manually parse msgDateTime to a Date object 
+    // because it is deserialized as a raw string by express server
+    const messageToAdd: Message = {
+      ...rawMessage,
+      // Invalid msgDateTime strings (e.g., "not-a-date") become Date objects wrapping NaN,
+      // which will be caught by isMessageValid check.
+      msgDateTime: new Date(rawMessage.msgDateTime),  
+    };
+
     if (!isMessageValid(messageToAdd)) {
-      res.status(400).json({ error: 'Invalid message' });
+      res.status(400).send('Invalid message');
       return;
     }
 
     const result = await saveMessage(messageToAdd);
     if ('error' in result) {
-      res.status(400).json(result);
+      res.status(500).json(result);
     } else {
       socket.emit('messageUpdate', { msg: result });
       res.status(200).json(result);
