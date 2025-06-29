@@ -39,6 +39,34 @@ describe('POST /addMessage', () => {
   });
 
   // TODO: Task 2 - Write additional test cases for addMessageRoute
+  it('should return 500 if saveMessage fails', async () => {
+    const message = {
+      _id: new mongoose.Types.ObjectId(),
+      msg: 'Hello',
+      msgFrom: 'User1',
+      msgDateTime: new Date('2024-06-04'),
+    };
+    saveMessageSpy.mockResolvedValueOnce({ error: 'Database error' });
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: message });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: 'Database error' });
+  });
+
+  it('should return 400 if message is invalid', async () => {
+    const invalidMessage = {
+      msgFrom: 'User1',
+      msgDateTime: new Date('2024-06-04'),
+    };
+    const response = await supertest(app)
+      .post('/messaging/addMessage')
+      .send({ messageToAdd: invalidMessage });
+
+    expect(response.status).toBe(400);
+    expect(response.text).toBe('Invalid message');
+  });
 });
 
 describe('GET /getMessages', () => {
@@ -72,5 +100,12 @@ describe('GET /getMessages', () => {
         msgDateTime: message2.msgDateTime.toISOString(),
       },
     ]);
+  });
+
+  it('should return an empty array if getMessages fails', async () => {
+    getMessagesSpy.mockResolvedValueOnce([]);
+    const response = await supertest(app).get('/messaging/getMessages');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual([]);
   });
 });
