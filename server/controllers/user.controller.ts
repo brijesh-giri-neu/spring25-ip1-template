@@ -139,8 +139,8 @@ const userController = () => {
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
-  router.get('/getUser/:username', getUser);
-  router.delete('/deleteUser/:username', deleteUser);
+  router.get('/getUser/:username?', getUser);
+  router.delete('/deleteUser/:username?', deleteUser);
   router.patch('/resetPassword', resetPassword);
 
   return router;
