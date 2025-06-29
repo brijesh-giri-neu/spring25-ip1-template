@@ -42,9 +42,9 @@ export const getUserByUsername = async (username: string): Promise<UserResponse>
  */
 export const loginUser = async (loginCredentials: UserCredentials): Promise<UserResponse> => {
   try {
-    const user = await UserModel.findOne({ 
+    const user = await UserModel.findOne({
       username: loginCredentials.username,
-      password: loginCredentials.password 
+      password: loginCredentials.password,
     });
     if (!user) {
       return { error: 'Invalid username or password' };

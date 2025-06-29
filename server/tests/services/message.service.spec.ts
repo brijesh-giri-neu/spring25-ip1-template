@@ -37,7 +37,9 @@ describe('Message model', () => {
     // TODO: Task 2 - Write a test case for saveMessage when an error occurs
     it('should return error when save fails', async () => {
       // Use Jest spy to simulate error
-      const createSpy = jest.spyOn(MessageModel, 'create').mockRejectedValueOnce(new Error('Database error'));
+      const createSpy = jest
+        .spyOn(MessageModel, 'create')
+        .mockRejectedValueOnce(new Error('Database error'));
 
       const result = await saveMessage(message1);
 
@@ -58,7 +60,9 @@ describe('Message model', () => {
     // TODO: Task 2 - Write a test case for getMessages when an error occurs
     it('should return empty array when getMessages fails', async () => {
       // Use Jest spy to simulate error
-      const findSpy = jest.spyOn(MessageModel, 'find').mockRejectedValueOnce(new Error('Database error'));
+      const findSpy = jest
+        .spyOn(MessageModel, 'find')
+        .mockRejectedValueOnce(new Error('Database error'));
 
       const messages = await getMessages();
 

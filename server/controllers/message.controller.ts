@@ -27,18 +27,15 @@ const messageController = (socket: FakeSOSocket) => {
    *
    * @returns `true` if the message is valid, otherwise `false`.
    */
-  const isMessageValid = (message: Message): boolean => {
+  const isMessageValid = (message: Message): boolean =>
     // We need type checks because req.body comes from external,
     // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
-    return (
-      typeof message.msg === 'string' &&
-      message.msg.trim() !== '' &&
-      typeof message.msgFrom === 'string' &&
-      message.msgFrom.trim() !== '' &&
-      message.msgDateTime instanceof Date && !isNaN(message.msgDateTime.getTime())  // Verify that msgDateTime is a valid Date object
-    );
-  };
-
+    typeof message.msg === 'string' &&
+    message.msg.trim() !== '' &&
+    typeof message.msgFrom === 'string' &&
+    message.msgFrom.trim() !== '' &&
+    message.msgDateTime instanceof Date &&
+    !Number.isNaN(message.msgDateTime.getTime()); // Verify that msgDateTime is a valid Date object
   /**
    * Handles adding a new message. The message is first validated and then saved.
    * If the message is invalid or saving fails, the HTTP response status is updated.
@@ -57,13 +54,13 @@ const messageController = (socket: FakeSOSocket) => {
     // Deserialized as a raw string by express server
     const rawMessage = req.body.messageToAdd;
 
-    // Need to manually parse msgDateTime to a Date object 
+    // Need to manually parse msgDateTime to a Date object
     // because it is deserialized as a raw string by express server
     const messageToAdd: Message = {
       ...rawMessage,
       // Invalid msgDateTime strings (e.g., "not-a-date") become Date objects wrapping NaN,
       // which will be caught by isMessageValid check.
-      msgDateTime: new Date(rawMessage.msgDateTime),  
+      msgDateTime: new Date(rawMessage.msgDateTime),
     };
 
     if (!isMessageValid(messageToAdd)) {

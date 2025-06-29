@@ -45,7 +45,7 @@ describe('Test userController', () => {
   afterAll(() => {
     jest.restoreAllMocks();
   });
-  
+
   describe('POST /signup', () => {
     it('should create a new user given correct arguments', async () => {
       const mockReqBody = {
