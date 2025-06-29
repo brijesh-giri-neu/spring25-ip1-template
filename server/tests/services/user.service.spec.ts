@@ -34,19 +34,17 @@ describe('User model', () => {
 
     // TODO: Task 1 - Write additional test cases for saveUser
     it('should return error when save fails', async () => {
-      mockingoose(UserModel).toReturn(new Error('Database error'), 'create');
-
+      const createSpy = jest.spyOn(UserModel, 'create').mockRejectedValueOnce(new Error('Database error'));
       const result = await saveUser(user);
-
       expect(result).toEqual({ error: 'Error when saving a user' });
+      createSpy.mockRestore();
     });
 
     it('should return error when create throws an exception', async () => {
-      mockingoose(UserModel).toReturn(new Error('Validation error'), 'create');
-
+      const createSpy = jest.spyOn(UserModel, 'create').mockRejectedValueOnce(new Error('Validation error'));
       const result = await saveUser(user);
-
       expect(result).toEqual({ error: 'Error when saving a user' });
+      createSpy.mockRestore();
     });
   });
 });
