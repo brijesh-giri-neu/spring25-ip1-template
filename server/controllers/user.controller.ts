@@ -37,7 +37,7 @@ const userController = () => {
    */
   const createUser = async (req: UserRequest, res: Response): Promise<void> => {
     if (!isUserBodyValid(req)) {
-      res.status(400).json({ error: 'Invalid user data' });
+      res.status(400).send('Invalid user body');
       return;
     }
     const user: User = {
@@ -49,7 +49,7 @@ const userController = () => {
     if ('error' in result) {
       res.status(400).json(result);
     } else {
-      res.status(201).json(result);
+      res.status(200).json(result);
     }
   };
 
@@ -61,7 +61,7 @@ const userController = () => {
    */
   const userLogin = async (req: UserRequest, res: Response): Promise<void> => {
     if (!isUserBodyValid(req)) {
-      res.status(400).json({ error: 'Invalid login data' });
+      res.status(400).send('Invalid user body');
       return;
     }
     const credentials: UserCredentials = {
@@ -105,7 +105,7 @@ const userController = () => {
   const deleteUser = async (req: UserByUsernameRequest, res: Response): Promise<void> => {
     const { username } = req.params;
     if (!username) {
-      res.status(400).json({ error: 'Username is required' });
+      res.status(400).send('Invalid user body');
       return;
     }
     const result = await deleteUserByUsername(username);
@@ -125,7 +125,7 @@ const userController = () => {
   const resetPassword = async (req: UserRequest, res: Response): Promise<void> => {
     const { username, password } = req.body || {};
     if (!username || !password) {
-      res.status(400).json({ error: 'Username and new password are required' });
+      res.status(400).send('Invalid user body');
       return;
     }
     const result = await updateUser(username, { password });
@@ -139,9 +139,9 @@ const userController = () => {
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
-  router.get('/:username', getUser);
-  router.delete('/:username', deleteUser);
-  router.patch('/reset-password', resetPassword);
+  router.get('/getUser/:username', getUser);
+  router.delete('/deleteUser/:username', deleteUser);
+  router.patch('/resetPassword', resetPassword);
 
   return router;
 };
