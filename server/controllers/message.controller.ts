@@ -16,7 +16,7 @@ const messageController = (socket: FakeSOSocket) => {
   const isRequestValid = (req: AddMessageRequest): boolean => {
     // We need type checks because req.body comes from external,
     // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
-    const { messageToAdd } = req.body || {};
+    const { messageToAdd } = req.body;
     return messageToAdd && typeof messageToAdd === 'object';
   };
 

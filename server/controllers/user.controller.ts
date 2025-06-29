@@ -17,7 +17,7 @@ const userController = () => {
    * @returns `true` if the body contains valid user fields; otherwise, `false`.
    */
   const isUserBodyValid = (req: UserRequest): boolean => {
-    const { username, password } = req.body || {};
+    const { username, password } = req.body;
     // We need type checks because req.body comes from external,
     // untyped sources like HTTP requests, which TypeScript cannot enforce at runtime.
     return (
@@ -123,7 +123,7 @@ const userController = () => {
    * @returns A promise resolving to void.
    */
   const resetPassword = async (req: UserRequest, res: Response): Promise<void> => {
-    const { username, password } = req.body || {};
+    const { username, password } = req.body;
     if (!username || !password) {
       res.status(400).send('Invalid user body');
       return;

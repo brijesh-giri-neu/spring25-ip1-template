@@ -73,7 +73,35 @@ describe('Test userController', () => {
       expect(response.text).toEqual('Invalid user body');
     });
 
-    // TODO: Task 1 - Write additional test cases for signupRoute
+    it('should return 400 for request missing password', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+      };
+      const response = await supertest(app).post('/user/signup').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for empty string username', async () => {
+      const mockReqBody = {
+        username: ' ',
+        password: mockUser.password,
+      };
+      const response = await supertest(app).post('/user/signup').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for empty string password', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        password: ' ',
+      };
+      const response = await supertest(app).post('/user/signup').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
     it('should return 400 if saveUser returns an error', async () => {
       const mockReqBody = {
         username: mockUser.username,
@@ -115,7 +143,6 @@ describe('Test userController', () => {
       expect(response.text).toEqual('Invalid user body');
     });
 
-    // TODO: Task 1 - Write additional test cases for loginRoute
     it('should return 401 if loginUser returns an error', async () => {
       const mockReqBody = {
         username: mockUser.username,
@@ -157,7 +184,15 @@ describe('Test userController', () => {
       expect(response.text).toEqual('Invalid user body');
     });
 
-    // TODO: Task 1 - Write additional test cases for resetPasswordRoute
+    it('should return 400 for request missing password', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+      };
+      const response = await supertest(app).patch('/user/resetPassword').send(mockReqBody);
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
     it('should return 404 if updateUser returns an error', async () => {
       const mockReqBody = {
         username: 'nonexistentuser',
@@ -183,13 +218,10 @@ describe('Test userController', () => {
     });
 
     it('should return 400 if username not provided', async () => {
-      // Express automatically returns 404 for missing parameters when
-      // defined as required in the route
       const response = await supertest(app).get('/user/getUser/');
       expect(response.status).toBe(400);
     });
 
-    // TODO: Task 1 - Write additional test cases for getUserRoute
     it('should return 404 if getUserByUsername returns an error', async () => {
       getUserByUsernameSpy.mockResolvedValueOnce({ error: 'User not found' });
       const response = await supertest(app).get(`/user/getUser/${mockUser.username}`);
@@ -211,13 +243,10 @@ describe('Test userController', () => {
     });
 
     it('should return 400 if username not provided', async () => {
-      // Express automatically returns 404 for missing parameters when
-      // defined as required in the route
       const response = await supertest(app).delete('/user/deleteUser/');
       expect(response.status).toBe(400);
     });
 
-    // TODO: Task 1 - Write additional test cases for deleteUserRoute
     it('should return 404 if deleteUserByUsername returns an error', async () => {
       deleteUserByUsernameSpy.mockResolvedValueOnce({ error: 'User not found' });
       const response = await supertest(app).delete(`/user/deleteUser/${mockUser.username}`);
