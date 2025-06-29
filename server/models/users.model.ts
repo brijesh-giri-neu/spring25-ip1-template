@@ -7,8 +7,10 @@ import { User } from '../types/types';
  *
  * This model is created using the `User` interface and the `userSchema`, representing the
  * `User` collection in the MongoDB database, and provides an interface for interacting with
- * the stored users.
+ * the stored users. The model will return SafeUser objects by default (without password).
  *
  * @type {Model<User>}
  */
-// TODO: Task 1 - Create and export the `UserModel` model. Refer to other model files for guidance.
+const UserModel: Model<User> = mongoose.model<User>('User', userSchema);
+
+export default UserModel;

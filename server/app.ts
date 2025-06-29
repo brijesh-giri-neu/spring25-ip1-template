@@ -24,10 +24,41 @@ const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:3000';
 const port = parseInt(process.env.PORT || '8000');
 
 const app = express();
-const server = http.createServer(app);
-const socket: FakeSOSocket = new Server(server, {
-  cors: { origin: '*' },
-});
+
+let server: http.Server | undefined;
+let socket: FakeSOSocket;
+
+if (process.env.NODE_ENV !== 'test') {
+  // Only create server and socket in non-test environment
+  server = http.createServer(app);
+  socket = new Server(server, {
+    cors: { origin: '*' },
+  });
+
+  socket.on('connection', socket => {
+    console.log('A user connected ->', socket.id);
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected');
+    });
+  });
+
+  process.on('SIGINT', async () => {
+    await mongoose.disconnect();
+    socket.close();
+    server?.close(() => {
+      console.log('Server closed.');
+      process.exit(0);
+    });
+  });
+} else {
+  // Create mock socket for test environment
+  socket = {
+    emit: jest.fn(),
+    on: jest.fn(),
+    close: jest.fn(),
+  } as unknown as FakeSOSocket;
+}
 
 function connectDatabase() {
   return mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
@@ -35,28 +66,10 @@ function connectDatabase() {
 
 function startServer() {
   connectDatabase();
-  server.listen(port, () => {
+  server?.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 }
-
-socket.on('connection', socket => {
-  console.log('A user connected ->', socket.id);
-
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
-});
-
-process.on('SIGINT', async () => {
-  await mongoose.disconnect();
-  socket.close();
-
-  server.close(() => {
-    console.log('Server closed.');
-    process.exit(0);
-  });
-});
 
 app.use(
   cors({

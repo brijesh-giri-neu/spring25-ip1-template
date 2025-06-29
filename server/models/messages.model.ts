@@ -12,3 +12,7 @@ import { Message } from '../types/message';
  * @type {Model<Message>}
  */
 // TODO: Task 2 - Create and export the `MessageModel` model. Refer to other model files for guidance.
+
+const MessageModel: Model<Message> = mongoose.model<Message>('Message', messageSchema);
+
+export default MessageModel;
